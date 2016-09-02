@@ -27,14 +27,15 @@ public class MainActivity extends AppCompatActivity {
     private ServiceConnection mServiceConnection=new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder binder) {
-            // TODO IBinder binder is returned by PlayerService IBinder onBind(...)
+            // IBinder binder is returned by PlayerService IBinder onBind(...)
+
             // successfully connected to a service
             mBound=true;
 
-            // TODO DOC-Binding to activity
-            // create LocalBinder from passed binder object (return by service's IBinder onBind() method
+            // Cast passed binder to our LocalBinder
             PlayerService.LocalBinder localBinder = (PlayerService.LocalBinder) binder;
 
+            // retreive reference to the service
             mPlayerService = localBinder.getService();
 
             /* User could enter the activity while music is already playing

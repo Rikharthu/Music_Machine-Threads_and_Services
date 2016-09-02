@@ -11,14 +11,13 @@ import android.util.Log;
 public class PlayerService extends Service{
     private static final String TAG = PlayerService.class.getSimpleName();
 
-    // TODO DOC-Binding to activity
     private IBinder mBinder = new LocalBinder();
     /**
      * Point of this class is to allow the activity to access this service
      */
-    // TODO DOC-Binding to activity
     public class LocalBinder extends Binder {
         public PlayerService getService(){
+            // Return this instance of PlayerService so clients can call public methods
             return PlayerService.this;
         }
 
@@ -27,7 +26,6 @@ public class PlayerService extends Service{
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         // we want our service to be in started state only when our song is playing
-        // use START_NOT_STICKY to prevent it from being destroyed while it is playing
         mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
 
             @Override
@@ -41,6 +39,7 @@ public class PlayerService extends Service{
                 stopSelf();
             }
         });
+        // use START_NOT_STICKY to prevent it from being destroyed while it is playing
         return Service.START_NOT_STICKY;
     }
 
@@ -58,7 +57,6 @@ public class PlayerService extends Service{
     @Override
     public IBinder onBind(Intent intent) {
         Log.d(TAG,"onBind()");
-        // TODO DOC-Binding to activity
         // return our LocalBinder. will be passed to onServiceConnected(... IBinder)
         return mBinder;
     }
