@@ -128,10 +128,12 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onStart() {
+        Log.d(TAG,"onStart()");
         super.onStart();
         Intent intent = new Intent(this, PlayerService.class);
         // Context.BIND_AUTO_CREATE - automatically create service when we bind to it
-        bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
+        boolean bound=bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
+        Log.d(TAG,"bound to service? "+bound);
     }
 
     @Override
@@ -148,7 +150,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-//        Log.d(TAG,"onDestroy()");
+        Log.d(TAG,"onDestroy()");
         super.onDestroy();
 //        // unbind from the service if still bound
 //        if(mBound){

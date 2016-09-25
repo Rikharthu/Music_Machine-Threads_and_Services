@@ -57,6 +57,8 @@ public class PlayerService extends Service{
     @Override
     public IBinder onBind(Intent intent) {
         Log.d(TAG,"onBind()");
+        // FIXME Почему не вызывается, если играет музыка (started state) и активность пересоздаётся
+        //если не играет музыка - вызывается в onStart() активности
         // return our LocalBinder. will be passed to onServiceConnected(... IBinder)
         return mBinder;
     }
@@ -94,4 +96,6 @@ public class PlayerService extends Service{
         Log.d(TAG,"onUnbind()");
         return super.onUnbind(intent);
     }
+
+
 }
