@@ -16,13 +16,9 @@ public class DownloadHandler extends Handler {
         String song = msg.obj.toString();
         downloadSong(song);
 
-        // Stop the service if it exists
+        // Stop the service if it exists after finishing downlload
         if(mService!=null){
-            // passed parameter is the id of the service
-            // stopSelf(id) makes sure that service is not Stopped until it finished handling it's intents
-            // in our case it will attempt to stop 5 times, actually stopping when startId=5
-            // this is because startCommand() was called 5 times => last launched startId is 5
-            // stopSelf(int) stops the service when passed startId equals last launched startId
+            // stopSelf(int) stops the service when passed startId equals last startId it was launched with
             mService.stopSelf(msg.arg1);
             Log.d(TAG,"Stopping DownloadService where startId="+msg.arg1);
         }

@@ -16,13 +16,15 @@ public class DownloadService extends Service {
     public void onCreate() {
         Log.d(TAG,"onCreate()");
 
+        // start new thread (since service code is running on main thread of the app that started it)
         DownloadThread thread = new DownloadThread();
         thread.setName("DownloadThread");
         thread.start();
 
         /*  */
-        // wait until the handler exists before getting reference to it
+        // wait until the handler on thread exists before getting reference to it
         while(thread.mHandler == null){}
+        // looper and handler instantiated, ready for handling messages
 
         mHandler=thread.mHandler;
         // pass reference to this service to the handler

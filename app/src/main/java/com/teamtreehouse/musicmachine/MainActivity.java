@@ -27,7 +27,7 @@ public class MainActivity extends AppCompatActivity {
     private ServiceConnection mServiceConnection=new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder binder) {
-            // IBinder binder is returned by PlayerService IBinder onBind(...)
+            // binder is returned by PlayerService onBind(...)
 
             // successfully connected to a service
             mBound=true;
@@ -35,11 +35,11 @@ public class MainActivity extends AppCompatActivity {
             // Cast passed binder to our LocalBinder
             PlayerService.LocalBinder localBinder = (PlayerService.LocalBinder) binder;
 
-            // retreive reference to the service
+            // retrieve reference to the service through LocalBinder's method
             mPlayerService = localBinder.getService();
 
             /* User could enter the activity while music is already playing
-            button would state "Play", since it is default */
+            button would state "Play", since it is default when activity is created */
             if(mPlayerService.isPlaying()){
                 mPlayButton.setText("Pause");
             }
@@ -62,9 +62,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         /* Handler version */
-        final DownloadThread thread = new DownloadThread();
-        thread.setName("DownloadThread");
-        thread.start();
+//        final DownloadThread thread = new DownloadThread();
+//        thread.setName("DownloadThread");
+//        thread.start();
 
         mDownloadButton = (Button) findViewById(R.id.downloadButton);
         mDownloadButton.setOnClickListener(new View.OnClickListener() {
@@ -107,6 +107,7 @@ public class MainActivity extends AppCompatActivity {
         mPlayButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // check if we are bound to PlayerService
                 if(mBound){
                     // use our client methods
                     if(mPlayerService.isPlaying()){
@@ -116,8 +117,7 @@ public class MainActivity extends AppCompatActivity {
                     }else{
                         // Start service with an intent (will trigger onStartCommand(), check it)
                         Intent intent = new Intent(MainActivity.this, PlayerService.class);
-//                        startService(intent);
-//                        bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
+                        startService(intent);
 
                         mPlayerService.play();
                         mPlayButton.setText("Pause");

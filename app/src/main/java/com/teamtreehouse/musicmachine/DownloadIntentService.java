@@ -31,10 +31,10 @@ public class DownloadIntentService extends IntentService {
         // This code runs on a separate thread
         String song = intent.getStringExtra(MainActivity.KEY_SONG);
         Log.d(TAG,"onHandleIntent() for song "+song);
-        // no need to use handler, since IntentService launches on a separate thread
+        // no need to use handler, since IntentService onHandleIntent works on a separate thread
         downloadSong(song);
 
-        /* Notification */
+        /* Build a Notification */
         // create an intent
         Intent intent2 = new Intent(this, MainActivity.class);
         // Use a TaskStackBuilder to make the back button play nicely

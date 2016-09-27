@@ -8,16 +8,17 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-public class PlayerService extends Service {
+public class PlayerService extends Service{
     private static final String TAG = PlayerService.class.getSimpleName();
 
     private IBinder mBinder = new LocalBinder();
 
     /**
-     * Point of this class is to allow the activity to access this service
+     * Using this class's getService() method we will get reference to PlayerService
+     * See onBind() method here below
      */
     public class LocalBinder extends Binder {
-        public PlayerService getService() {
+        public PlayerService getService(){
             // Return this instance of PlayerService so clients can call public methods
             return PlayerService.this;
         }
@@ -27,11 +28,15 @@ public class PlayerService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         // we want our service to be in started state only when our song is playing
+        // thus we will prevent service from being destroyed if no activity is bound to it,
+        // but it still is playing music
+
+        // stop service (leave started state) when music finished playing
         mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
 
             @Override
             public void onCompletion(MediaPlayer mp) {
-                Log.d(TAG, "OnCompletionListener.onCompletion()");
+                Log.d(TAG,"OnCompletionListener.onCompletion()");
                 // In other words - persist started state while song is playing
                 // leaving Activity will call unBind(), but wont call onDestroy()
                 // if song aint playing - stop to exit from started state, thus letting service to destroy
@@ -45,58 +50,56 @@ public class PlayerService extends Service {
     }
 
     // Will use for handling song
-    private static MediaPlayer mPlayer;
+    private MediaPlayer mPlayer;
 
     @Override
     public void onCreate() {
-        Log.d(TAG, "onCreate()");
-        if (mPlayer == null) {
-            mPlayer = MediaPlayer.create(this, R.raw.pharaoh_mm);
-        }
+        Log.d(TAG,"onCreate()");
+        mPlayer=MediaPlayer.create(this,R.raw.pharaoh_mm);
     }
 
     // Gets called every time app binds to this service
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        Log.d(TAG, "onBind()");
-        // FIXME Почему не вызывается, если играет музыка (started state) и активность пересоздаётся
-        //если не играет музыка - вызывается в onStart() активности
+        Log.d(TAG,"onBind()");
+
         // return our LocalBinder. will be passed to onServiceConnected(... IBinder)
+        // See onServiceConnected in MainActivity
         return mBinder;
     }
 
     // Client Methods
-    public void play() {
-        Log.d(TAG, "play()");
-        Log.d(TAG, "play()");
+    public void play(){
+        Log.d(TAG,"play()");
         mPlayer.start();
     }
 
-    public void pause() {
-        Log.d(TAG, "pause()");
+    public void pause(){
+        Log.d(TAG,"pause()");
         mPlayer.pause();
     }
 
-    public boolean isPlaying() {
+    public boolean isPlaying(){
         return mPlayer.isPlaying();
     }
 
-    public void stop() {
+    public void stop(){
         mPlayer.stop();
     }
 
 
     @Override
     public void onDestroy() {
-        Log.d(TAG, "onDestroy()");
+        Log.d(TAG,"onDestroy()");
         super.onDestroy();
     }
 
 
+
     @Override
     public boolean onUnbind(Intent intent) {
-        Log.d(TAG, "onUnbind()");
+        Log.d(TAG,"onUnbind()");
         return super.onUnbind(intent);
     }
 
