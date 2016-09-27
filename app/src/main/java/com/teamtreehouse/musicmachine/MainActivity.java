@@ -116,7 +116,8 @@ public class MainActivity extends AppCompatActivity {
                     }else{
                         // Start service with an intent (will trigger onStartCommand(), check it)
                         Intent intent = new Intent(MainActivity.this, PlayerService.class);
-                        startService(intent);
+//                        startService(intent);
+//                        bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
 
                         mPlayerService.play();
                         mPlayButton.setText("Pause");
