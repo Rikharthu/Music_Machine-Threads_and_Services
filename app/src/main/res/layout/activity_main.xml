@@ -21,7 +21,7 @@
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Play"
+        android:text="Hurhurr"
         android:id="@+id/playButton"
         android:layout_above="@+id/downloadButton"
         android:layout_centerHorizontal="true"/>

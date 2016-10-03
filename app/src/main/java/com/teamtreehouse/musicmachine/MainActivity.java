@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.Messenger;
+import android.os.RemoteException;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.view.ActionMode;
@@ -21,8 +23,12 @@ public class MainActivity extends AppCompatActivity {
     private Button mDownloadButton;
     private Button mPlayButton;
     private boolean mBound=false;
-    // TODO DOC-Binding to activity
-    private PlayerService mPlayerService;
+    // We will use Messenger approach
+//    private PlayerService mPlayerService;
+    private Messenger mServiceMessenger;
+    private Messenger mActivityMessenger=new Messenger(new ActivityHandler(this));
+
+
 
     private ServiceConnection mServiceConnection=new ServiceConnection() {
         @Override
@@ -32,16 +38,31 @@ public class MainActivity extends AppCompatActivity {
             // successfully connected to a service
             mBound=true;
 
-            // Cast passed binder to our LocalBinder
+            // Get reference to PlayerService
+            /*
+            // 1. Cast passed binder to our LocalBinder
             PlayerService.LocalBinder localBinder = (PlayerService.LocalBinder) binder;
 
             // retreive reference to the service
             mPlayerService = localBinder.getService();
 
-            /* User could enter the activity while music is already playing
-            button would state "Play", since it is default */
             if(mPlayerService.isPlaying()){
                 mPlayButton.setText("Pause");
+            }
+            */
+            // Messenger approach:
+            mServiceMessenger=new Messenger(binder);
+            Message message = Message.obtain();
+            message.arg1=2; // is playing?
+            message.arg2=1; //  we just want to check button state, without playing/pausing
+            // provide our own messenger as a replyTo parameter to hear back
+            message.replyTo=mActivityMessenger;
+            // use mServiceMessenger to send message to a service
+            try {
+                Log.d(TAG,"sending to mServiceMessenger\n"+MessageUtils.getMsgInfo(message));
+                mServiceMessenger.send(message);
+            } catch (RemoteException e) {
+                e.printStackTrace();
             }
         }
 
@@ -51,9 +72,6 @@ public class MainActivity extends AppCompatActivity {
             mBound=false;
         }
     };
-
-
-
 
 
     @Override
@@ -95,9 +113,19 @@ public class MainActivity extends AppCompatActivity {
                     // Extends IntentService
                     Intent intent = new Intent(MainActivity.this,DownloadIntentService.class);
                     intent.putExtra(KEY_SONG, song);
-
                     // Request to start a service
                     startService(intent);
+
+                    Message message = Message.obtain();
+                    message.arg1=2; // is playing?
+                    // provide our own messenger as a replyTo parameter to hear back
+                    message.replyTo=mActivityMessenger;
+                    // use mServiceMessenger to send message to a service
+                    try {
+                        mServiceMessenger.send(message);
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
 
                 }
             }
@@ -108,18 +136,22 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if(mBound){
-                    // use our client methods
-                    if(mPlayerService.isPlaying()){
-                        // Since song is not playing anymore, we can stop our service
-                        mPlayerService.pause();
-                        mPlayButton.setText("Play");
-                    }else{
-                        // Start service with an intent (will trigger onStartCommand(), check it)
-                        Intent intent = new Intent(MainActivity.this, PlayerService.class);
-                        startService(intent);
+                    // Start service with an intent (will trigger onStartCommand(), check it)
+                    Intent intent = new Intent(MainActivity.this, PlayerService.class);
+                    startService(intent);
 
-                        mPlayerService.play();
-                        mPlayButton.setText("Pause");
+                    Message message = Message.obtain();
+                    message.arg1=2; // is playing?
+                    // since we want to actually play or stop music, do not specify arg2
+//                    message.arg2=1;
+                    // provide our own messenger as a replyTo parameter to hear back
+                    message.replyTo=mActivityMessenger;
+                    // use mServiceMessenger to send message to a service
+                    try {
+                        Log.d(TAG,"sending to mServiceMessenger\n"+MessageUtils.getMsgInfo(message));
+                        mServiceMessenger.send(message);
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
                     }
                 }
             }
@@ -146,14 +178,8 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    protected void onDestroy() {
-//        Log.d(TAG,"onDestroy()");
-        super.onDestroy();
-//        // unbind from the service if still bound
-//        if(mBound){
-//            unbindService(mServiceConnection);
-//            mBound=false;
-//        }
+    public void changePlayButtonText(String text){
+        mPlayButton.setText(text);
     }
+
 }

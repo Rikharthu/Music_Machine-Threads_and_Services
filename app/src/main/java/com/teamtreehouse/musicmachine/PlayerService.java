@@ -1,20 +1,22 @@
 package com.teamtreehouse.musicmachine;
 
+import android.app.Notification;
 import android.app.Service;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.Messenger;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
 public class PlayerService extends Service{
     private static final String TAG = PlayerService.class.getSimpleName();
 
+    // We do not need Binder anymore
+    /*
     private IBinder mBinder = new LocalBinder();
-    /**
-     * Point of this class is to allow the activity to access this service
-     */
+
     public class LocalBinder extends Binder {
         public PlayerService getService(){
             // Return this instance of PlayerService so clients can call public methods
@@ -22,9 +24,19 @@ public class PlayerService extends Service{
         }
 
     }
+    */
+    // Instead use messenger. Create a Messenger pointing to a specified Handler
+    public Messenger mMessenger = new Messenger(new PlayerHandler(this));
+
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        // Provide notification to startForeground() to persist service in a foreground
+        Notification.Builder notificationBuilder = new Notification.Builder(this);
+        notificationBuilder.setSmallIcon(R.drawable.ic_music_note_black_24dp);
+        Notification notification = notificationBuilder.build();
+        startForeground(11, notification);
+
         // we want our service to be in started state only when our song is playing
         mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
 
@@ -37,6 +49,8 @@ public class PlayerService extends Service{
                 // when leaving the activity.
                 // stop service immidiatelly when song completed/paused
                 stopSelf();
+                // exit foreground
+                stopForeground(true);
             }
         });
         // use START_NOT_STICKY to prevent it from being destroyed while it is playing
@@ -57,8 +71,9 @@ public class PlayerService extends Service{
     @Override
     public IBinder onBind(Intent intent) {
         Log.d(TAG,"onBind()");
-        // return our LocalBinder. will be passed to onServiceConnected(... IBinder)
-        return mBinder;
+
+//        return mBinder;
+        return mMessenger.getBinder();
     }
 
     // Client Methods
