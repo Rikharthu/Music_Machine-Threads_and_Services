@@ -42,8 +42,8 @@ public class DownloadService extends Service {
 
         mHandler.sendMessage(message);
 
-        // Make it return this value instead of default super.onStartCommand()
-        // Re-deliver all unfinished intents
+        // stop the service, however , when more memory becomes available - restart
+        // and with onStartCommand() with the last delivered intent
         return Service.START_REDELIVER_INTENT;
     }
 
